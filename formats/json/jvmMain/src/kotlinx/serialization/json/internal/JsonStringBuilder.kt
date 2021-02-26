@@ -18,40 +18,53 @@ internal actual class JsonStringBuilder {
     }
 
     actual fun append(ch: Char) {
-        ensureCapacity(1)
+        ensureAdditionalCapacity(1)
         array[size++] = ch
     }
 
     actual fun append(s: String) {
         val length = s.length
-        ensureCapacity(length)
+        ensureAdditionalCapacity(length)
         s.getCharsMpp(0, length, array, size)
         size += length
     }
 
-    actual fun appendQuoted(s: String) {
-        ensureCapacity(s.length + 2)
+    actual fun appendQuoted(string: String) {
+        ensureAdditionalCapacity(string.length + 2)
         val arr = array
         var sz = size
         arr[sz++] = '"'
-        val length = s.length
-        s.getCharsMpp(0, length, arr, sz)
+        val length = string.length
+        string.getCharsMpp(0, length, arr, sz)
         for (i in sz until sz + length) {
             val ch = arr[i].toInt()
             // Do we have unescaped symbols?
             if (ch < ESCAPE_STRINGS.size && ESCAPE_STRINGS[ch] != null) {
-                val marker = ESCAPE_STRINGS[ch]!!
-                if (marker.length == 1) {
-                    TODO()
-                } else {
-                    // Nope, slow path, let's reprocess string again
-                    TODO()
-                }
+                // Go to slow path
+                return appendStringSlowPath(i - length, i, string)
             }
         }
-
+        // Update the state
         sz += length
         arr[sz++] = '"'
+        size = sz
+    }
+
+    private fun appendStringSlowPath(firstEscapedChar: Int, currentSize: Int, string: String) {
+        var sz = currentSize
+        for (i in firstEscapedChar until string.length) {
+            val ch = string[i].toInt()
+            // Do we have unescaped symbols?
+            if (ch < ESCAPE_STRINGS.size && ESCAPE_STRINGS[ch] != null) {
+                val escapedString = ESCAPE_STRINGS[ch]!!
+                ensureTotalCapacity(sz + escapedString.length)
+                escapedString.getCharsMpp(0, escapedString.length, array, sz)
+                sz += escapedString.length
+            } else {
+                array[sz++] = string[i]
+            }
+        }
+        array[sz++] = '"'
         size = sz
     }
 
@@ -59,8 +72,11 @@ internal actual class JsonStringBuilder {
         return String(array, 0, size).also { size = 0 }
     }
 
-    private fun ensureCapacity(expected: Int) {
-        val newSize = size + expected
+    private fun ensureAdditionalCapacity(expected: Int) {
+        ensureTotalCapacity(size + expected)
+    }
+
+    private fun ensureTotalCapacity(newSize: Int) {
         if (array.size <= newSize) {
             array = array.copyOf(newSize.coerceAtLeast(size * 2))
         }
