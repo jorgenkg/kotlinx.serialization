@@ -18,7 +18,7 @@ private fun toHexChar(i: Int) : Char {
  * JVM cannot perform advanced range-check elimination and vectorization in printQuoted
  */
 @SharedImmutable
-internal val ESCAPE_STRINGS: Array<String?> = arrayOfNulls<String>(92).apply {
+internal val ESCAPE_STRINGS: Array<String?> = arrayOfNulls<String>(93).apply {
     for (c in 0..0x1f) {
         val c1 = toHexChar(c shr 12)
         val c2 = toHexChar(c shr 8)
@@ -37,7 +37,7 @@ internal val ESCAPE_STRINGS: Array<String?> = arrayOfNulls<String>(92).apply {
 
 
 @SharedImmutable
-public val ESCAPE_MARKERS: BooleanArray = BooleanArray(92).apply {
+public val ESCAPE_MARKERS: BooleanArray = BooleanArray(93).apply {
     // Control chars need generic escape sequence
     for (i in 0..31) {
        set(i, true)
