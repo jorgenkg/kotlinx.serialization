@@ -29,3 +29,7 @@ open class TwitterBenchmark {
     @Benchmark
     fun writeTwitter() = Json.encodeToString(Twitter.serializer(), twitter)
 }
+
+fun main() {
+    println(TwitterBenchmark().writeTwitter())
+}

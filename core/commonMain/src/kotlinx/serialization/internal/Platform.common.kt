@@ -140,3 +140,5 @@ internal expect fun Any.isInstanceOf(kclass: KClass<*>): Boolean
 internal inline fun <T, K> Iterable<T>.elementsHashCodeBy(selector: (T) -> K): Int {
     return fold(1) { hash, element -> 31 * hash + selector(element).hashCode() }
 }
+
+public expect fun String.getCharsMpp(srcBegin: Int, srcEnd: Int, dst:CharArray, dstBegin: Int)

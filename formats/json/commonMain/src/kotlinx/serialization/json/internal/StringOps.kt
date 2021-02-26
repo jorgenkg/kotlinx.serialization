@@ -4,6 +4,7 @@
 
 package kotlinx.serialization.json.internal
 
+import kotlinx.serialization.internal.*
 import kotlin.native.concurrent.SharedImmutable
 
 private fun toHexChar(i: Int) : Char {
@@ -17,7 +18,7 @@ private fun toHexChar(i: Int) : Char {
  * JVM cannot perform advanced range-check elimination and vectorization in printQuoted
  */
 @SharedImmutable
-private val ESCAPE_CHARS: Array<String?> = arrayOfNulls<String>(128).apply {
+    internal val ESCAPE_STRINGS: Array<String?> = arrayOfNulls<String>(128).apply {
     for (c in 0..0x1f) {
         val c1 = toHexChar(c shr 12)
         val c2 = toHexChar(c shr 8)
@@ -34,21 +35,43 @@ private val ESCAPE_CHARS: Array<String?> = arrayOfNulls<String>(128).apply {
     this[0x0c] = "\\f"
 }
 
+/*
+ * M
+ */
+@SharedImmutable
+internal val ESCAPE_MARKERS: IntArray = IntArray(128).apply {
+    // Control chars need generic escape sequence
+    // Control chars need generic escape sequence
+    for (i in 0..31) {
+        // 04-Mar-2011, tatu: Used to use "-(i + 1)", replaced with constant
+       set(i, -1)
+    }
+    val table = this
+    table['"'.toInt()] = 1
+    table['\\'.toInt()] = 1
+    table[0x08] = 1
+    table[0x09] = 1
+    table[0x0C] = 1
+    table[0x0A] = 1
+    table[0x0D] = 1
+}
+
 internal fun StringBuilder.printQuoted(value: String) {
     append(STRING)
     var lastPos = 0
-    val length = value.length
-    for (i in 0 until length) {
+    for (i in value.indices) {
         val c = value[i].toInt()
         // Do not replace this constant with C2ESC_MAX (which is smaller than ESCAPE_CHARS size),
         // otherwise JIT won't eliminate range check and won't vectorize this loop
-        if (c >= ESCAPE_CHARS.size) continue // no need to escape
-        val esc = ESCAPE_CHARS[c] ?: continue
-        append(value, lastPos, i) // flush prev
-        append(esc)
-        lastPos = i + 1
+        if (c < ESCAPE_STRINGS.size && ESCAPE_STRINGS[c] != null) {
+            append(value, lastPos, i) // flush prev
+            append(ESCAPE_STRINGS[c])
+            lastPos = i + 1
+        }
     }
-    append(value, lastPos, length)
+
+    if (lastPos != 0) append(value, lastPos, value.length)
+    else append(value)
     append(STRING)
 }
 

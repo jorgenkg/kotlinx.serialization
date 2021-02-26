@@ -152,3 +152,5 @@ private fun <T : Any> findObjectSerializer(jClass: Class<T>): KSerializer<T>? {
 internal actual fun Any.isInstanceOf(kclass: KClass<*>): Boolean = kclass.javaObjectType.isInstance(this)
 
 internal actual fun isReferenceArray(rootClass: KClass<Any>): Boolean = rootClass.java.isArray
+
+public actual fun String.getCharsMpp(srcBegin: Int, srcEnd: Int, dst:CharArray, dstBegin: Int) = (this as java.lang.String).getChars(srcBegin, srcEnd, dst, dstBegin)
