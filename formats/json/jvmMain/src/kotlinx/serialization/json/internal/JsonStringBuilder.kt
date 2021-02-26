@@ -5,11 +5,6 @@ import kotlinx.serialization.internal.*
 internal actual class JsonStringBuilder {
 
     private var array = CharArray(32)
-    /*
-     * TODO
-     */
-    private var escapedResult = CharArray(32)
-
     private var size = 0
 
     actual fun append(l: Long) {
@@ -39,7 +34,7 @@ internal actual class JsonStringBuilder {
         for (i in sz until sz + length) {
             val ch = arr[i].toInt()
             // Do we have unescaped symbols?
-            if (ch < ESCAPE_STRINGS.size && ESCAPE_STRINGS[ch] != null) {
+            if (ch < ESCAPE_MARKERS.size && ESCAPE_MARKERS[ch]) {
                 // Go to slow path
                 return appendStringSlowPath(i - length, i, string)
             }
