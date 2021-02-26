@@ -37,21 +37,20 @@ private fun toHexChar(i: Int) : Char {
 
 
 @SharedImmutable
-internal val ESCAPE_MARKERS: BooleanArray = BooleanArray(128).apply {
+internal val ESCAPE_MARKERS: IntArray = IntArray(128).apply {
     // Control chars need generic escape sequence
     // Control chars need generic escape sequence
     for (i in 0..31) {
         // 04-Mar-2011, tatu: Used to use "-(i + 1)", replaced with constant
-       set(i, true)
+       set(i, 1)
     }
-    val table = this
-    this['"'.toInt()] = true
-    this['\\'.toInt()] = true
-    this[0x08] = true
-    this[0x09] = true
-    this[0x0C] = true
-    this[0x0A] = true
-    this[0x0D] = true
+    this['"'.toInt()] = 1
+    this['\\'.toInt()] = 1
+    this[0x08] = 1
+    this[0x09] = 1
+    this[0x0C] = 1
+    this[0x0A] = 1
+    this[0x0D] = 1
 }
 
 internal fun StringBuilder.printQuoted(value: String) {
