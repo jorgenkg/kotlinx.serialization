@@ -34,7 +34,7 @@ internal actual class JsonStringBuilder {
         for (i in sz until sz + length) {
             val ch = arr[i].toInt()
             // Do we have unescaped symbols?
-            if (ch < ESCAPE_MARKERS.size && ESCAPE_MARKERS[ch] != 0) {
+            if (ch < ESCAPE_MARKERS.size && ESCAPE_MARKERS[ch]) {
                 // Go to slow path
                 return appendStringSlowPath(i - length, i, string)
             }
